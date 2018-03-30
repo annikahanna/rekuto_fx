@@ -10,19 +10,33 @@ import java.util.ArrayList;
 
 public class Solve {
 
+    //Rectangles = fields around the values
+    //solution are all possible rectangles
     ArrayList<Rectangle> solution = new ArrayList<>();
+    //all rectangles which aren't possible
     ArrayList<Rectangle> nonSolution = new ArrayList<>();
     int boardSize;
+    //is it possible to find a fitting rectangle
     boolean impossible = false;
 
     public Solve(int boardSize) {
         this.boardSize = boardSize;
     }
 
-    public boolean backtracking(GridPane gridPane, int row, int column) {
-        while (!impossible) {
-            //if no label in Stackpane --> next row
+    public ArrayList<Rectangle> getSolution() {
+        return solution;
+    }
 
+    public ArrayList<Rectangle> getNonSolution() {
+        return nonSolution;
+    }
+
+    //Backtracking to find a solution
+    public boolean backtracking(GridPane gridPane, int row, int column) {
+        //as long as it is possible to find a rectangle stay in the loop
+        while (!impossible) {
+
+            //if no label in Stackpane --> next field
             while (getValueOfStackPane(getStackPaneByPosition(row, column, gridPane)) == 0) {
                 if (row < 9) {
                     row++;
@@ -32,14 +46,16 @@ public class Solve {
                 }
             }
 
-
+//if value found, look for a fitting rectangle
             Rectangle rectangle = findRectangle(row, column, gridPane);
+            //rectangle is empty = no possible rectangle for this value available; we have to go back
             if (rectangle.getRectangleParts().isEmpty() && row == 0 && column == 0) {
                 impossible = true;
             }
 
             if (evaluate(rectangle)) {
                 solution.add(rectangle);
+                //rekuto is not finished, we go on to the next StackPane
                 if (!finished(gridPane)) {
                     if (row < 9) {
                         row++;
@@ -47,10 +63,13 @@ public class Solve {
                         row = 0;
                         column++;
                     }
-
+//same procedure again
                     if (backtracking(gridPane, row, column)) {
                         return true;
-                    } else {
+                    }
+                    //evaluation failed; last rectangle is removed from the solution and added to the nonSolution
+                    //we go a field back as long as we don't find a value
+                    else {
                         nonSolution.add(solution.get(solution.size() - 1));
                         solution.remove(solution.size() - 1);
                         do {
@@ -63,16 +82,20 @@ public class Solve {
                             }
                         } while (getValueOfStackPane(getStackPaneByPosition(row, column, gridPane)) == 0);
                     }
-                } else {
+                }
+                //when finished return true = problem is solved
+                else {
                     return true;
                 }
             } else {
-                // nonSolution.add(rectangle);
+                //evaluation failed, Rectangle is not legal, we have to go back
                 return false;
             }
         }
+        //tried all rectangles; no solution found
         return false;
     }
+
 
     //evaluates wheter step is legal
     public boolean evaluate(Rectangle rectangle) {
@@ -80,7 +103,6 @@ public class Solve {
             for (int j = 0; j < solution.get(i).getRectangleParts().size(); j++) {
                 for (int k = 0; k < rectangle.getRectangleParts().size(); k++)
                     if (solution.get(i).getRectangleParts().get(j) == rectangle.getRectangleParts().get(k)) {
-                        // nonSolution.add(rectangle);
                         return false;
                     }
             }
@@ -110,6 +132,7 @@ public class Solve {
         return true;
     }
 
+    //gives back the StackPane by row and column
     public StackPane getStackPaneByPosition(int row, int column, GridPane gridPane) {
         Node result = null;
         ObservableList<Node> ls = gridPane.getChildren();
@@ -124,6 +147,8 @@ public class Solve {
         return (StackPane) result;
     }
 
+
+    //gives back the value which is written in the StackPanes
     public int getValueOfStackPane(StackPane stackPane) {
 
         try {
@@ -138,10 +163,9 @@ public class Solve {
         }
     }
 
-    public Rectangle findRectangle(int row, int column, GridPane gridpane) {
+    //find possible rectangle
 
-       // ArrayList<StackPane> stackPanes = new ArrayList<>();
-       // Rectangle rectangle = new Rectangle(stackPanes);
+    public Rectangle findRectangle(int row, int column, GridPane gridpane) {
 
 
         int widthOfRectangle = 1;
@@ -153,44 +177,75 @@ public class Solve {
         boolean notFilledCorrect = false;
         boolean solutionFound = false;
 
+        //as long as I haven't found the whole rectangle
         while (!solutionFound) {
+            ArrayList<StackPane> stackPanes = new ArrayList<>();
+            Rectangle rectangle = new Rectangle(stackPanes);
+            //already add the StackPane with the value
+            stackPanes.add(stackPane);
             heightOfRectangle = valueOfStackPane - widthOfRectangle;
 
+            //seraching for StackPanes down and right
             for (int differenceInX = 0; differenceInX < widthOfRectangle; differenceInX++) {
 
                 for (int differenceInY = 0; differenceInY < heightOfRectangle; differenceInY++) {
 
-                    ArrayList<StackPane> stackPanes = new ArrayList<>();
-                    Rectangle rectangle = new Rectangle(stackPanes);
-                    int positionOfValueX = column - differenceInX;
-                    int positionOfValueY = row - differenceInY;
-                    for (int i = 0; i < heightOfRectangle; i++) {
-                        for (int j = 0; j < widthOfRectangle; j++) {
-
-                            if (positionOfValueX - j >= 0 && positionOfValueX - j < 10 && positionOfValueY - i >= 0 && positionOfValueY - i < 10) {//hier prüfen ob StackPane irgendeinen Wert hat
-                                if (getValueOfStackPane(getStackPaneByPosition(positionOfValueY - i, positionOfValueX - j, gridpane)) != 0 && positionOfValueY - i != row && positionOfValueX - j != column) {
-                                    notFilledCorrect = true;
-                                } else {
-                                    stackPanes.add(getStackPaneByPosition(positionOfValueY - i, positionOfValueX - j, gridpane));
-                                }
-                            } else {
+                    //are we outside of the gridpane
+                    if (row + differenceInY > 9 || column + differenceInX > 9) {
+                        notFilledCorrect = true;
+                    } else {
+                        int value = getValueOfStackPane(getStackPaneByPosition(row + differenceInY, column + differenceInX, gridpane));
+                        //is there a value in the StackPane
+                        if (value != 0) {
+                            if (differenceInX != 0 && differenceInY != 0 || differenceInX == 0 || differenceInY == 0) {
                                 notFilledCorrect = true;
                             }
-
+                        } else {
+                            //StackPane is ok, StackPane is added to the other ones who are forming the Rectangle
+                            stackPanes.add(getStackPaneByPosition(row + differenceInY, column + differenceInX, gridpane));
                         }
+
                     }
 
-                    if (!notFilledCorrect) {
-                        rectangle = new Rectangle(stackPanes);
-                        if (!containsInNonSolution(rectangle)) {
-                            return rectangle;
+
+                }
+            }
+            if (stackPanes.size() < Math.sqrt(valueOfStackPane / 2)) {
+                heightOfRectangle = valueOfStackPane - widthOfRectangle;
+                //searching for StackPanes up and left
+                for (int differenceInX = 0; differenceInX < widthOfRectangle; differenceInX++) {
+
+                    for (int differenceInY = 0; differenceInY < heightOfRectangle; differenceInY++) {
+
+                        //are we outside of the gridpane
+                        if (row - differenceInY < 0 || column - differenceInX < 0) {
+                            notFilledCorrect = true;
+                        } else {
+                            int value = getValueOfStackPane(getStackPaneByPosition(row - differenceInY, column - differenceInX, gridpane));
+                            //is there a value in the StackPane
+                            if (value != 0) {
+                                if (differenceInX != 0 && differenceInY != 0) {
+                                    notFilledCorrect = true;
+                                }
+                            } else {
+                                //StackPane is ok, StackPane is added to the other ones who are forming the Rectangle
+                                stackPanes.add(getStackPaneByPosition(row - differenceInY, column - differenceInX, gridpane));
+                            }
                         }
                     }
+                }
+            }
+            //creates rectangle
+            if (!notFilledCorrect) {
+                rectangle = new Rectangle(stackPanes);
+                if (!containsInNonSolution(rectangle)) {
+                    return rectangle;
                 }
             }
             if (widthOfRectangle == valueOfStackPane - 1) {
                 solutionFound = true;
             }
+            //if rectangle not found try other rectangle form
             widthOfRectangle++;
         }
 

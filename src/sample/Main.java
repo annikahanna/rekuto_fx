@@ -15,12 +15,10 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import logic.Solve;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public class Main extends Application {
-
-    public static ArrayList<Rectangle> nichtLösung = new ArrayList();
-
 
     @Override
     public void init() {
@@ -41,7 +39,18 @@ public class Main extends Application {
         } else {
             System.out.println("no solution found");
         }
+        String hexColorCode = "5882FA";
+        String colorCode = "-fx-background-color: #"+ hexColorCode;
 
+        ArrayList<logic.Rectangle> solution = solve.getSolution();
+        for(int i =0; i< solution.size(); i++){
+            for(int j=0; j< solution.get(i).getRectangleParts().size(); j++){
+                solution.get(i).getRectangleParts().get(j).setStyle(colorCode);
+            }
+            int newColor = Integer.parseInt(hexColorCode, 16);
+            hexColorCode = Integer.toHexString(newColor+2000);
+            colorCode = "-fx-background-color: #"+ hexColorCode;
+        }
         //hier Farben der Stackpanes in Gridpane anpassen nach Solution
 
         primaryStage.setScene(new Scene(root, 500, 500));
@@ -53,84 +62,6 @@ public class Main extends Application {
     @Override
     public void stop() {
 
-    }
-
-    public boolean fertig() {
-        boolean flag = false;
-
-        //fertig, wenn alle Felder eingefärbt sind
-        //fertig, wenn Flächeninhalt aller Formen im Hintergrund = 100 = deckungsgleich
-
-        return flag;
-    }
-
-
-
-    public boolean Rectangles_Vergleichen(Rectangle x, Rectangle y) {
-        boolean gleich = false;
-        if (x.getHeight() == y.getHeight() && x.getWidth() == y.getWidth() && x.getX() == y.getX() && x.getY() == y.getY()) {
-            gleich = true;
-        }
-
-        return gleich;
-    }
-
-    public Rectangle lösen(int value, int pos_x_value, int pos_y_value) {
-        //so lange lösung suchen bis neue Gefunden, dann beenden
-        int länge_x = 1; //oder Länge?
-        int höhe_y = 0; // oder Höhe?
-        int größe_x_zelle = 50;
-        int größe_y_zelle = 50;
-        int pos_x = 0;
-        int pos_y = 0;
-        boolean nochLösungenVorhanden = true;
-
-        while (nochLösungenVorhanden) {
-            höhe_y = value - länge_x;
-
-            for (int i = 0; i < länge_x; i++) {
-                pos_x = pos_x_value - i * größe_x_zelle;
-                for (int j = 0; j < höhe_y; j++) {
-                    pos_y = pos_y_value - j * größe_y_zelle;
-                    Rectangle r = new Rectangle(pos_x * größe_x_zelle, pos_y * größe_y_zelle, länge_x * größe_x_zelle, höhe_y * größe_y_zelle);
-
-                    for (Rectangle rect : nichtLösung) {
-                        if (Rectangles_Vergleichen(rect, r)) {
-                            System.out.println("schon vorhanden");
-                            if (länge_x == value) {
-                                nochLösungenVorhanden = false;
-                            } else {//erst nächste Variante probieren, vor nächster Form
-                                //  länge_x++; // oder break?
-                            }
-                        } else {
-                            System.out.println("neue Lösung gefunden");
-                            return r;
-                        }
-                    }
-                }
-            }
-            länge_x++;
-            /*Rectangle r = new Rectangle(pos_x*größe_x_zelle,pos_y*größe_y_zelle,länge_x*größe_x_zelle,höhe_y*größe_y_zelle);
-
-            //nichtLösung als ArrayList von Rectangles: Idee Rectangle einzigartig durch Position und Größe
-            //adden zu root in start(), dorthin wird Rectangle übergeben
-            //wenn Lösung noch nicht probiert --> return r; | sonst pos_x++ und nächste Schleife, wenn jedoch x schon maximal keine Lösung vorhanden
-
-            for(Rectangle rect : nichtLösung){
-                if(Rectangles_Vergleichen(rect, r)){
-                    System.out.println("schon vorhanden");
-                    if(länge_x == value){nochLösungenVorhanden = false;} else{//erst nächste Variante probieren, vor nächster Form
-                        länge_x++;
-                    }
-                } else {
-                    System.out.println("neue Lösung gefunden");
-                    return r;
-                }
-            }
-            */
-
-        }
-        return null;
     }
 
     public static void main(String[] args) {
