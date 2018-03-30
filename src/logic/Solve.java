@@ -174,11 +174,11 @@ public class Solve {
         StackPane stackPane = getStackPaneByPosition(row, column, gridpane);
         int valueOfStackPane = getValueOfStackPane(stackPane);
 
-        boolean notFilledCorrect = false;
         boolean solutionFound = false;
 
         //as long as I haven't found the whole rectangle
         while (!solutionFound) {
+            boolean notFilledCorrect = false;
             ArrayList<StackPane> stackPanes = new ArrayList<>();
             Rectangle rectangle = new Rectangle(stackPanes);
             //already add the StackPane with the value
@@ -197,7 +197,7 @@ public class Solve {
                         int value = getValueOfStackPane(getStackPaneByPosition(row + differenceInY, column + differenceInX, gridpane));
                         //is there a value in the StackPane
                         if (value != 0) {
-                            if (differenceInX != 0 && differenceInY != 0 || differenceInX == 0 || differenceInY == 0) {
+                            if (differenceInX != 0 || differenceInY != 0) {
                                 notFilledCorrect = true;
                             }
                         } else {
@@ -210,7 +210,7 @@ public class Solve {
 
                 }
             }
-            if (stackPanes.size() < Math.sqrt(valueOfStackPane / 2)) {
+            if (stackPanes.size() < widthOfRectangle*heightOfRectangle) {
                 heightOfRectangle = valueOfStackPane - widthOfRectangle;
                 //searching for StackPanes up and left
                 for (int differenceInX = 0; differenceInX < widthOfRectangle; differenceInX++) {
@@ -224,7 +224,7 @@ public class Solve {
                             int value = getValueOfStackPane(getStackPaneByPosition(row - differenceInY, column - differenceInX, gridpane));
                             //is there a value in the StackPane
                             if (value != 0) {
-                                if (differenceInX != 0 && differenceInY != 0) {
+                                if (differenceInX != 0 || differenceInY != 0) {
                                     notFilledCorrect = true;
                                 }
                             } else {

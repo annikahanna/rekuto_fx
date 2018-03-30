@@ -43,6 +43,7 @@ public class Main extends Application {
         String colorCode = "-fx-background-color: #"+ hexColorCode;
 
         ArrayList<logic.Rectangle> solution = solve.getSolution();
+        //set color of the rectangles
         for(int i =0; i< solution.size(); i++){
             for(int j=0; j< solution.get(i).getRectangleParts().size(); j++){
                 solution.get(i).getRectangleParts().get(j).setStyle(colorCode);
@@ -51,7 +52,7 @@ public class Main extends Application {
             hexColorCode = Integer.toHexString(newColor+2000);
             colorCode = "-fx-background-color: #"+ hexColorCode;
         }
-        //hier Farben der Stackpanes in Gridpane anpassen nach Solution
+
 
         primaryStage.setScene(new Scene(root, 500, 500));
         primaryStage.show();
